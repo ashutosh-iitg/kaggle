@@ -11,7 +11,7 @@ import albumentations as A
 from albumentations.pytorch.transforms import ToTensorV2
 
 class RANZCRDataset(Dataset):
-    def __init__(self, dataframe, config, transforms=None):
+    def __init__(self, dataframe, params, transforms=None):
         super().__init__()
         """
         Store the filenames of the jpgs to use. Specifies transforms to apply on images.
@@ -19,12 +19,12 @@ class RANZCRDataset(Dataset):
             shape: (tuple: height, width) shape of image
             dataframe: (pd.DataFrame) dataframe containing image paths and labels
             transforms: (albumentations.transforms) transformation to apply on image
-            config: (Params class object) configuration data
+            params: (Params class object) hyperparameters
         """
         self.df = dataframe
-        self.labels = dataframe[config.target_cols].values
+        self.labels = dataframe[params.target_cols].values
         self.transforms = transforms
-        self.shape = (config.height, config.width)
+        self.shape = (params.height, params.width)
 
     def __len__(self) -> int:
         """
@@ -55,20 +55,20 @@ class RANZCRDataset(Dataset):
             
         return image, label
 
-def fetch_dataloader(dataframe, config, data='train'):
+def fetch_dataloader(dataframe, params, data='train'):
     """
     Fetches the DataLoader object for each type in types from data_dir.
     Args:
         dataframe: (dataframe) Dataframe containing data
-        config: (Params class object) configuration parameters for dataloader
+        params: (Params class object) hyperparameters
         data: (string) type of data (train or valid)
     Returns:
         data_loader: (torch.utils.data.DataLoader) contains
                         the DataLoader object
     """
     # get parameters
-    batch_size = config.batch_size
-    num_workers = config.num_workers
+    batch_size = params.batch_size
+    num_workers = params.num_workers
 
     if data == 'train':
         shuffle = True
@@ -76,7 +76,7 @@ def fetch_dataloader(dataframe, config, data='train'):
         shuffle = False
 
     # load dataset
-    dataset = RANZCRDataset(dataframe, config, transforms = get_transforms(config, data))
+    dataset = RANZCRDataset(dataframe, params, transforms = get_transforms(params, data))
 
     data_loader = DataLoader(
         dataset, batch_size=batch_size, num_workers=num_workers, 
@@ -85,11 +85,11 @@ def fetch_dataloader(dataframe, config, data='train'):
     return data_loader
 
 
-def get_transforms(config, data):
+def get_transforms(params, data):
     if data == 'train':
         return A.Compose([
             A.HorizontalFlip(p=0.5),
-            A.RandomResizedCrop(config.height, config.width, scale=(0.85, 1.0)),
+            A.RandomResizedCrop(params.height, params.width, scale=(0.85, 1.0)),
             A.RandomContrast(limit=0.2, always_apply=False, p=0.5),
             ToTensorV2(p=1.0),
         ])
