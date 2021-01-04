@@ -108,16 +108,6 @@ def main(args):
         optimizer, scheduler, loss_fn, metrics, params, model_dir
     )
 
-def str2bool(v):
-    if isinstance(v, bool):
-       return v
-    if v.lower() in ('yes', 'true', 't', 'y', '1'):
-        return True
-    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
-        return False
-    else:
-        raise argparse.ArgumentTypeError('Boolean value expected.')
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
@@ -127,7 +117,9 @@ if __name__ == '__main__':
     parser.add_argument('--mode', type=str, default='res', choices=['dense', 'res', 'efficient'], 
                             help='training model')
     parser.add_argument('--fold', type=int, default='4', help='validation fold')
-    parser.add_argument('--debug', type=str2bool, default="False", help='run script in debug mode')
+    parser.add_argument('--debug', dest='debug', action='store_true', help='run script in debug mode')
+    parser.add_argument('--no-debug', dest='debug', action='store_false', help='run script in train mode')
+    parser.set_defaults(debug=False)
 
     args = parser.parse_args()
     
