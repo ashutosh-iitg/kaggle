@@ -1,0 +1,13 @@
+{
+    "debug": false,
+    "train": true,
+    "learning_rate": 1e-2,
+    "batch_size": 32,
+    "num_epochs": 50,
+    "num_folds": 5,
+    "height": 300,
+    "width": 300,
+    "seed": 230,
+    "num_workers": 0,
+    "save_summary_steps": 50
+}
