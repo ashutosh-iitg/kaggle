@@ -8,6 +8,6 @@
     "height": 300,
     "width": 300,
     "seed": 230,
-    "num_workers": 4,
+    "num_workers": 8,
     "save_summary_steps": 50
 }
