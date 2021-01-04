@@ -7,7 +7,7 @@ from model.resnet import resnext50_32x4d
 import numpy as np
 from sklearn.metrics import roc_auc_score
 
-class ResNext(nn.Module):
+class CustomResNext(nn.Module):
     def __init__(self, params, pretrained:bool):
         super().__init__()
         self.model = resnext50_32x4d(pretrained=pretrained)
@@ -28,7 +28,7 @@ class ResNext(nn.Module):
 class RANZCRModel():
     def __init__(self, params, pretrained:bool=False):
         if params.mode == 'res':
-            self.model = ResNext(params, pretrained)
+            self.model = CustomResNext(params, pretrained)
         else:
             assert()
 
