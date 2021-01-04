@@ -63,7 +63,7 @@ def main(args):
     df, target_cols, num_targets = train_data.df, train_data.target_cols, train_data.num_targets
 
     # check for debug mode
-    if params.debug:
+    if args.debug:
         params.num_epochs = 1
         df = df.sample(n=100, random_state=params.seed).reset_index(drop=True)
 
@@ -108,6 +108,15 @@ def main(args):
         optimizer, scheduler, loss_fn, metrics, params, model_dir
     )
 
+def str2bool(v):
+    if isinstance(v, bool):
+       return v
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -118,6 +127,7 @@ if __name__ == '__main__':
     parser.add_argument('--mode', type=str, default='res', choices=['dense', 'res', 'efficient'], 
                             help='training model')
     parser.add_argument('--fold', type=int, default='4', help='validation fold')
+    parser.add_argument('--debug', type=str2bool, default="False", help='run script in debug mode')
 
     args = parser.parse_args()
     
