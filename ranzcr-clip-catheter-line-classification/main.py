@@ -21,7 +21,6 @@ from data.preprocess import DataPreprocess
 
 import models
 from models import RANZCRModel
-from models import get_score
 from train import train_and_evaluate
 
 import utils
@@ -104,7 +103,7 @@ def main(args):
     # Train the model
     logging.info("Starting training for {} epoch(s)".format(params.num_epochs))
     train_and_evaluate(
-        model, train_dataloader, valid_dataloader,
+        model, train_dataloader, valid_dataloader, valid_df[params.target_cols].values,
         optimizer, scheduler, loss_fn, metrics, params, model_dir
     )
 

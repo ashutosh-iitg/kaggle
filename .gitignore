@@ -1,7 +1,7 @@
 # Local project files/directories
 .DS_Store
 ranzcr-clip-catheter-line-classification/input/
-ranzcr-clip-catheter-line-classification/output/
+# ranzcr-clip-catheter-line-classification/output/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

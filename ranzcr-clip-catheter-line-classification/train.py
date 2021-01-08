@@ -10,6 +10,7 @@ from tqdm import tqdm
 
 import utils
 from evaluate import evaluate
+from models import get_score
 
 def train(model, optimizer, loss_fn, dataloader, metrics, params):
     """Train the model on `num_steps` batches
@@ -57,7 +58,7 @@ def train(model, optimizer, loss_fn, dataloader, metrics, params):
             optimizer.step()
 
             # Evaluate summaries only once in a while
-            if i % params.save_summary_steps == 0:
+            '''if i % params.save_summary_steps == 0:
                 # extract data from tensors, move to cpu, convert to numpy arrays
                 output_batch = output_batch.detach().to(torch.device('cpu')).numpy()
                 labels_batch = labels_batch.detach().to(torch.device('cpu')).numpy()
@@ -66,7 +67,7 @@ def train(model, optimizer, loss_fn, dataloader, metrics, params):
                 summary_batch = {} #Modify this (Temporary definition to check training)
                 #summary_batch = {metric: metrics[metric](output_batch, labels_batch) for metric in metrics}
                 summary_batch['loss'] = loss.item()
-                summ.append(summary_batch)
+                summ.append(summary_batch)'''
 
             # update the average loss
             loss_avg.update(loss.item())
@@ -75,12 +76,12 @@ def train(model, optimizer, loss_fn, dataloader, metrics, params):
             t.update()
 
     # compute mean of all metrics in summary
-    metrics_mean = {metric: np.mean([x[metric] for x in summ]) for metric in summ[0]}
+    '''metrics_mean = {metric: np.mean([x[metric] for x in summ]) for metric in summ[0]}
     
     metrics_string = " ; ".join("{}_{}: {:05.3f}".format(k, v) for k, v in metrics_mean.items())
-    logging.info("- Train metrics: " + metrics_string)
+    logging.info("- Train metrics: " + metrics_string)'''
 
-def train_and_evaluate(model, train_dataloader, valid_dataloader, optimizer, scheduler, loss_fn, metrics, params, 
+def train_and_evaluate(model, train_dataloader, valid_dataloader, valid_labels, optimizer, scheduler, loss_fn, metrics, params, 
                         model_dir, restore_file=None):
     """Train the model and evaluate every epoch.
     Args:
@@ -112,10 +113,12 @@ def train_and_evaluate(model, train_dataloader, valid_dataloader, optimizer, sch
         train(model, optimizer, loss_fn, train_dataloader, metrics, params)
 
         # Evaluate for one epoch on validation set
-        val_metrics = evaluate(model, loss_fn, valid_dataloader, metrics, params)
-        scheduler.step()
+        val_metrics, val_preds = evaluate(model, loss_fn, valid_dataloader, metrics, params)
+        scheduler.step(val_metrics)
+        score = get_score(valid_labels, val_preds)
+        logging.info("- Eval metrics: ROC AUC Score: {:05.3f}".format(score))
 
-        val_loss = val_metrics['loss']
+        val_loss = val_metrics
         is_best = val_loss <= best_loss
 
         # Save weights
@@ -131,12 +134,11 @@ def train_and_evaluate(model, train_dataloader, valid_dataloader, optimizer, sch
             best_val_loss = val_loss
 
             # Save best val metrics in a json file in the model directory
-            best_json_path = os.path.join(
+            '''best_json_path = os.path.join(
                 model_dir, "metrics_val_best_weights.json")
             utils.save_dict_to_json(val_metrics, best_json_path)
 
         # Save latest val metrics in a json file in the model directory
         last_json_path = os.path.join(
             model_dir, "metrics_val_last_weights.json")
-        utils.save_dict_to_json(val_metrics, last_json_path)
-        
+        utils.save_dict_to_json(val_metrics, last_json_path)'''

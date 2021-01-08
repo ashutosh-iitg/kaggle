@@ -22,7 +22,8 @@ def evaluate(model, loss_fn, dataloader, metrics, params):
     model.eval()
 
     # summary for current eval loop
-    summ = []
+    preds = []
+    loss_avg = utils.RunningAverage()
 
     # compute metrics over the dataset
     for data_batch, labels_batch in dataloader:
@@ -34,26 +35,34 @@ def evaluate(model, loss_fn, dataloader, metrics, params):
             device = torch.device('cpu')
             
         data_batch = data_batch.to(device)
-        labels_batch = c1_labels_batch.to(device)
+        labels_batch = labels_batch.to(device)
         
         # compute model output and loss
-        output_batch = model(data_batch)
+        with torch.no_grad():
+            output_batch = model(data_batch)
         loss = loss_fn(output_batch, labels_batch)
 
+        preds.append(output_batch.sigmoid().detach().to(torch.device('cpu')).numpy())
         # extract data from tensors, move to cpu, convert to numpy arrays
-        output_batch = output_batch.detach().to(torch.device('cpu')).numpy()
-        labels_batch = labels_batch.detach().to(torch.device('cpu')).numpy()
+        #output_batch = output_batch.detach().to(torch.device('cpu')).numpy()
+        #labels_batch = labels_batch.detach().to(torch.device('cpu')).numpy()
         
         # compute all metrics on this batch
-        summary_batch = {} #Modify this (Temporary definition to check training)
+        #summary_batch = {} #Modify this (Temporary definition to check training)
         #summary_batch = {metric: metrics[metric](output_batch, labels_batch) for metric in metrics}
-        summary_batch['loss'] = loss.item()
-        summ.append(summary_batch)
+        #summary_batch['loss'] = loss.item()
+        #summ.append(summary_batch)
+        #loss_val.append(loss.item())
+
+        # update the average loss
+        loss_avg.update(loss.item())
         
     # compute mean of all metrics in summary
-    metrics_mean = {metric: np.mean([x[metric] for x in summ]) for metric in summ[0]}
+    #metrics_mean = {metric: np.mean([x[metric] for x in summ]) for metric in summ[0]}
     
-    metrics_string = " ; ".join("{}_{}: {:05.3f}".format(k, v) for k, v in metrics_mean.items())
-    logging.info("- Eval metrics: " + metrics_string)
+    #metrics_string = " ; ".join("{}_{}: {:05.3f}".format(k, v) for k, v in metrics_mean.items())
+    logging.info("- Eval metrics: loss: {:05.3f}".format(loss_avg()))
     
-    return metrics_mean
+    predictions = np.concatenate(preds)
+
+    return loss_avg(), predictions
